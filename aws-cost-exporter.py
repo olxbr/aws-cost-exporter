@@ -45,44 +45,8 @@ def getCosts():
         GroupBy=[
             {
                 'Type': 'TAG',
-                'Key': 'App'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Bkt'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'AvailabilityZone'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Env'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'DestinationRegion'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Process'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Product'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Release'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Tier'
-            },
-            {
-                'Type': 'TAG',
-                'Key': 'Backup'
-            },
+                'Key': 'Name'
+            }
 
         ]
     )
