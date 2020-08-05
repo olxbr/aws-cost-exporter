@@ -22,14 +22,14 @@ def getCosts():
     now = datetime.datetime.utcnow()
 
     # Set the end of the range to start of the current day
-    end = datetime.datetime(year=now.year, month=now.month, day=now.day)
+    end = datetime.datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
 
     # Subtract a day to define the start of the range
-    start = end - datetime.timedelta(days=1)
+    start = end - datetime.timedelta(hours=1)
 
     # Convert them to strings
-    start = start.strftime('%Y-%m-%d')
-    end = end.strftime('%Y-%m-%d')
+    start = start.strftime('%Y-%m-%d-%H')
+    end = end.strftime('%Y-%m-%d-%H')
 
     print("Starting script searching by the follow time range")
     print(start + " - " + end)
@@ -47,7 +47,6 @@ def getCosts():
                 'Type': 'TAG',
                 'Key': 'Name'
             }
-
         ]
     )
 
