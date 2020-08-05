@@ -28,8 +28,8 @@ def getCosts():
     start = end - datetime.timedelta(hours=1)
 
     # Convert them to strings
-    start = start.strftime('%Y-%m-%d-%H')
-    end = end.strftime('%Y-%m-%d-%H')
+    start = start.strftime('%Y-%m-%dT%H:00:00Z')
+    end = end.strftime('%Y-%m-%dT%H:00:00Z')
 
     print("Starting script searching by the follow time range")
     print(start + " - " + end)
