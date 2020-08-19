@@ -22,10 +22,12 @@ def getCosts():
     now = datetime.datetime.utcnow()
 
     # Set the end of the range to start of the current day
-    end = datetime.datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
+    end = datetime.datetime(
+        year=now.year, month=now.month, day=now.day, hour=now.hour)
 
     # Subtract a day to define the start of the range
-    start = end - datetime.timedelta(hours=1)
+    start =  datetime.datetime(
+        year=now.year, month=now.month, day=now.day, hour=0)
 
     # Convert them to strings
     start = start.strftime('%Y-%m-%dT%H:00:00Z')
@@ -51,30 +53,26 @@ def getCosts():
     )
 
     # Create an empty dictionary
-    projectValues = {}
+    projectValues = []
 
     # Run the response and make a dictionary with tag name and tag value
-    for project in response["ResultsByTime"][0]["Groups"]:
-
-        # Search for tag
-        namestring = project['Keys'][0]
-        name = re.search("\$(.*)", namestring).group(1)
-
-        # If name is none, let's defined it as Other
-        if name is None or name == "":
-            name = "Other"
-
+    for project in response["ResultsByTime"]:
+        
         # Get the value
-        amount = project['Metrics']['BlendedCost']['Amount']
+        group = project["Groups"]
+
+        if not group:
+            continue
+        amount = group[0]['Metrics']['BlendedCost']['Amount']
+        
         # Format the time to 0.2 points
         amount = "{0:.2f}".format(float(amount))
 
         # Append the values in the directionary
-        projectValues[name] = float(amount)
+        projectValues.append(float(amount))
 
     # Return the dictionary with all those values
     return projectValues
-
 
 # Start classe collector
 class costExporter(object):
@@ -87,9 +85,9 @@ class costExporter(object):
                         'Total amount of costs for project', 'gauge')
 
         # Run the retuned dictionary and expose the metrics
-        for project, cost in getCosts().items():
+        for cost in getCosts():
             metric.add_sample('aws_project_cost', value=cost,
-                              labels={'project': project})
+                              labels={'project': 'aws'})
 
         # /Expose the metric
         yield metric
@@ -100,7 +98,6 @@ if __name__ == '__main__':
     start_http_server(port)
 
     metrics = costExporter()
-
     REGISTRY.register(metrics)
 
     while True:
