@@ -1,0 +1,98 @@
+version: 2
+defaults: &defaults
+  machine:
+    image: circleci/classic:latest
+  environment:
+    KUBE_VERSION: 1.15.4
+    KUBEVAL_BLACKLIST: "customresourcedefinition|clusterissuer|istio|virtualservice|gateway|certificate"
+jobs:
+
+  build_image:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: docker build
+          command: docker build -t vivareal/aws-cost-exporter:latest -f Dockerfile .
+      - run:
+          name: Docker save cache
+          command: |
+            mkdir -p docker-cache
+            docker save -o docker-cache/aws-cost-exporter-latest.tar vivareal/aws-cost-exporter:latest
+      - save_cache:
+          key: aws-cost-exporter-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - docker-cache
+
+  test_deploy:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Install kubeval
+          command: |
+            wget https://github.com/garethr/kubeval/releases/download/0.14.0/kubeval-linux-amd64.tar.gz
+            tar xf kubeval-linux-amd64.tar.gz
+      - run:
+          name: Run tests on deploy
+          command: |
+            find deploy -name "*.yaml" | grep -Ev ${KUBEVAL_BLACKLIST} | xargs ./kubeval --kubernetes-version ${KUBE_VERSION}
+
+  master:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+         keys:
+           - aws-cost-exporter-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: load docker cache
+          command: docker load < docker-cache/aws-cost-exporter-latest.tar
+      - run:
+          name: docker login
+          command: docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+      - run:
+          name: publish image
+          command: |
+            docker tag aws-cost-exporter:latest aws-cost-exporter:master
+            docker push aws-cost-exporter:master
+            
+ 
+  hub:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+         keys:
+           - aws-cost-exporter-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: load docker cache
+          command: docker load < docker-cache/aws-cost-exporter-latest.tar
+      - run:
+          name: docker login
+          command: docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+      - run:
+          name: publish image
+          command: |
+            docker push aws-cost-exporter:latest
+            docker tag aws-cost-exporter:latest aws-cost-exporter:$CIRCLE_TAG
+            docker push aws-cost-exporter:$CIRCLE_TAG
+
+workflows:
+  version: 2
+  continuous_integration:
+    jobs:
+    - build_image
+    - test_deploy
+    - master:
+        context: docker-access
+        filters:
+          branches:
+            only: master
+    - hub:
+        context: docker-access
+        filters:
+          tags:
+            only: /^v[0-9]+\.[0-9]+\.[0-9]+(-alpha[0-9]+|-beta[0-9]+|-rc[0-9]+)?/
+          branches:
+            ignore: /.*/

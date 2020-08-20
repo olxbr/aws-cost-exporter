@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-cost-exporter
+  namespace: monitoring
+  labels:
+    app: aws-cost-exporter
+    product: platform
+data:
+  TAG_PROJECT: Name
+  PORT: '9150'
