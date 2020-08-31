@@ -10,6 +10,7 @@ metadata:
   labels:
     app: aws-cost-exporter
     product: platform
+    process: exporter
 spec:
   ports:
   - port: 9150

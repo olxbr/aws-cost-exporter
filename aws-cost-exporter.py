@@ -8,9 +8,6 @@ import boto3
 import datetime
 import json, ast
 
-# Try get the TAG_PROJECT env variable. If not defined, we will use the Scost
-tagProject = os.getenv('TAG_PROJECT', 'Name')
-
 # Try get the PORT env variable. If not defined, we will use the 9150
 port = os.getenv('PORT', 9150)
 
@@ -79,9 +76,8 @@ def getCosts():
 
             unincoded_product_value = ast.literal_eval(json.dumps(product_value))
             unincoded_app_value = ast.literal_eval(json.dumps(app_value))
-          
-
-            if (not unincoded_product_value or unincoded_product_value is None or unincoded_product_value == '') and (not unincoded_app_value or unincoded_app_value is None or unincoded_app_value == ''):
+            
+            if (not unincoded_product_value) and (not unincoded_app_value):
                 print('ignoring current resource')
                 continue
 
