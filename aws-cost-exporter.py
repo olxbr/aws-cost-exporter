@@ -118,7 +118,7 @@ class costExporter(object):
 
 if __name__ == '__main__':
 
-    start_http_server(port)
+    start_http_server(int(port))
 
     metrics = costExporter()
     REGISTRY.register(metrics)
