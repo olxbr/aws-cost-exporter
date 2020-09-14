@@ -3,7 +3,7 @@ defaults: &defaults
   machine:
     image: circleci/classic:latest
   environment:
-    KUBE_VERSION: 1.17.11
+    KUBE_VERSION: 1.17.4
     KUBEVAL_BLACKLIST: "customresourcedefinition|clusterissuer|istio|virtualservice|gateway|certificate"
 jobs:
 
